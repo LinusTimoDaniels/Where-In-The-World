@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Where In The World</string>
+    <string name="title_activity_game">GameActivity</string>
+    <string name="where_in_the_world">Where in the World</string>
+    <string name="start_game">Start Game</string>
 </resources>
