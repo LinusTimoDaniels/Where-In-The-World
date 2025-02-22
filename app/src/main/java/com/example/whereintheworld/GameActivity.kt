@@ -11,16 +11,20 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.SupportStreetViewPanoramaFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.whereintheworld.databinding.ActivityGameBinding
+import com.google.android.gms.maps.StreetViewPanorama
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.StreetViewPanoramaCamera
 import com.google.maps.android.SphericalUtil
 
 class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityGameBinding
     private lateinit var myMap: GoogleMap
+    private lateinit var streetViewPanorama: StreetViewPanorama
     private var userMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +40,18 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        // Initialize Street View
+        val streetViewFragment = supportFragmentManager
+            .findFragmentById(R.id.streetView) as SupportStreetViewPanoramaFragment
+        streetViewFragment.getStreetViewPanoramaAsync { panorama ->
+            streetViewPanorama = panorama
+            streetViewPanorama.setPosition(LatLng(-33.8688, 151.2093)) // Example: Sydney
+            val camera = StreetViewPanoramaCamera.Builder()
+                .zoom(1f)
+                .build()
+            streetViewPanorama.animateTo(camera, 2000)
         }
 
         // Initialize the map
