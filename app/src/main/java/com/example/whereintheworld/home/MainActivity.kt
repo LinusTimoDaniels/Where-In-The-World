@@ -1,5 +1,5 @@
 // MainActivity.kt (Starting Screen)
-package com.example.whereintheworld
+package com.example.whereintheworld.home
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,8 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.whereintheworld.databinding.ActivityGameBinding
 import com.example.whereintheworld.databinding.ActivityMainBinding
+import com.example.whereintheworld.game.GameActivity
 
 class MainActivity : AppCompatActivity() {
 
