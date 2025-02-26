@@ -75,7 +75,6 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         val intent = Intent(this, GameService::class.java)
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
 
-        // Set padding for system bars
         ViewCompat.setOnApplyWindowInsetsListener(binding.game) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -147,10 +146,10 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
         myMap.addPolyline(
             PolylineOptions()
-                .add(guess, location)  // Verbindet die zwei Punkte
-                .width(10f)  // Breite der Linie
-                .color(getColor(R.color.black))  // Farbe der Linie
-                .pattern(pattern)  // Setzt das gestrichelte Muster
+                .add(guess, location)
+                .width(10f)
+                .color(getColor(R.color.black))
+                .pattern(pattern)
         )
 
         myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 7.5f))
@@ -162,10 +161,10 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         val params = mapContainer.layoutParams
 
         if (isMapExpanded) {
-            params.width = dpToPx(175) // Small size
+            params.width = dpToPx(175)
             params.height = dpToPx(175)
         } else {
-            params.width = dpToPx(400) // Large size
+            params.width = dpToPx(400)
             params.height = dpToPx(400)
         }
 
