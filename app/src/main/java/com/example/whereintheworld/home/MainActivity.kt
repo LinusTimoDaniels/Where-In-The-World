@@ -1,4 +1,3 @@
-// MainActivity.kt (Starting Screen)
 package com.example.whereintheworld.home
 
 import android.content.Intent

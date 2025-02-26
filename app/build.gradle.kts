@@ -53,7 +53,9 @@ dependencies {
     implementation(libs.play.services.maps)
     // To calculate distance between to points
     implementation(libs.android.maps.utils)
-
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.activity.ktx)
 }
 
 secrets {

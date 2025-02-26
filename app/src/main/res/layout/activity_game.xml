@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".game.GameActivity">
 
-    <!-- Street View (Full Screen) -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/streetView"
         android:name="com.google.android.gms.maps.SupportStreetViewPanoramaFragment"
@@ -16,7 +15,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="#FF0000" />
+
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/mapContainer"
