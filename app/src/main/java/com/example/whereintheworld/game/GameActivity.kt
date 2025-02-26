@@ -2,11 +2,14 @@ package com.example.whereintheworld.game
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.example.whereintheworld.R
 import com.example.whereintheworld.databinding.ActivityGameBinding
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -22,14 +25,12 @@ import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityGameBinding
     private val gameViewModel: GameViewModel by viewModels()
-    private lateinit var myMap: GoogleMap
+    private var myMap: GoogleMap? = null // Changed to nullable type
 
     private var userMarker: Marker? = null
 
@@ -39,8 +40,13 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup edge-to-edge
         enableEdgeToEdge()
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.game) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
 
         startGame()
         observeViewModel()
@@ -49,7 +55,6 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun observeViewModel() {
         gameViewModel.location.observe(this) { newLocation ->
             setupStreetView(newLocation)
-            setupMap()
         }
 
         gameViewModel.userGuess.observe(this) { guess ->
@@ -86,12 +91,15 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         val streetViewFragment = supportFragmentManager
             .findFragmentById(R.id.streetView) as SupportStreetViewPanoramaFragment
         streetViewFragment.getStreetViewPanoramaAsync { panorama ->
-            lifecycleScope.launch(Dispatchers.Main) {
-                panorama.setPosition(location)
-                panorama.isStreetNamesEnabled = false
-                panorama.isPanningGesturesEnabled = true
-                panorama.isUserNavigationEnabled = true
-                panorama.isZoomGesturesEnabled = true
+            panorama.setPosition(location)
+            panorama.isStreetNamesEnabled = false
+            panorama.isUserNavigationEnabled = true
+            panorama.isPanningGesturesEnabled = true
+            panorama.isZoomGesturesEnabled = true
+            panorama.setOnStreetViewPanoramaChangeListener { streetViewPanoramaLocation ->
+                if (streetViewPanoramaLocation?.links == null) {
+                    Toast.makeText(this, "No Street View Available", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -103,10 +111,10 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun updateGuessMarker(guess: LatLng) {
-        // Avoid adding/removing markers if the guess is unchanged
-        if (userMarker == null || userMarker?.position != guess) {
+
+        if (myMap != null && (userMarker == null || userMarker?.position != guess)) {
             userMarker?.remove()
-            userMarker = myMap.addMarker(
+            userMarker = myMap?.addMarker(
                 MarkerOptions()
                     .position(guess)
                     .title("Your guess")
@@ -116,10 +124,15 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun endGame() {
-        userMarker?.position?.let { gameViewModel.setUserGuess(it) }
-        gameViewModel.calculateDistance()
 
-        myMap.addMarker(
+        findViewById<View>(R.id.streetView).visibility = View.GONE
+        findViewById<View>(R.id.gameEndLayout).visibility = View.VISIBLE
+
+        findViewById<Button>(R.id.restartGameButton).setOnClickListener {
+
+        }
+
+        myMap?.addMarker(
             MarkerOptions()
                 .position(gameViewModel.location.value!!)
                 .title("Actual Location")
@@ -127,7 +140,7 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
         )
 
-        myMap.addPolyline(
+        myMap?.addPolyline(
             PolylineOptions()
                 .add(gameViewModel.userGuess.value!!, gameViewModel.location.value!!)
                 .width(10f)
@@ -135,20 +148,24 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
                 .pattern(listOf(Dash(20f), Gap(10f)))
         )
 
-        myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(gameViewModel.location.value!!, 7.5f))
+        myMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(gameViewModel.location.value!!, 7.5f))
     }
 
     private fun adjustMapSize(isExpanded: Boolean) {
         val mapContainer = findViewById<View>(R.id.mapContainer)
-        val params = mapContainer.layoutParams
+        val params = mapContainer.layoutParams as ConstraintLayout.LayoutParams
 
-        // Dynamically adjust map size
+        val displayMetrics = resources.displayMetrics
+        val marginStartEnd = dpToPx(16)
+
         if (isExpanded) {
-            params.width = dpToPx(400)
-            params.height = dpToPx(400)
+            val newSize = displayMetrics.widthPixels - (marginStartEnd * 2)
+            params.width = newSize
+            params.height = newSize
         } else {
-            params.width = dpToPx(175)
-            params.height = dpToPx(175)
+            val collapsedSize = dpToPx(175)
+            params.width = collapsedSize
+            params.height = collapsedSize
         }
 
         mapContainer.layoutParams = params
@@ -158,20 +175,27 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         return (dp * resources.displayMetrics.density).toInt()
     }
 
+
     override fun onMapReady(googleMap: GoogleMap) {
         myMap = googleMap
 
-        // Map configuration
-        myMap.uiSettings.isZoomGesturesEnabled = true
-        myMap.uiSettings.isScrollGesturesEnabled = true
-        myMap.uiSettings.isRotateGesturesEnabled = true
-        myMap.uiSettings.isTiltGesturesEnabled = true
-        myMap.uiSettings.isZoomControlsEnabled = false
+        myMap?.uiSettings?.apply {
+            isZoomGesturesEnabled = true
+            isScrollGesturesEnabled = true
+            isRotateGesturesEnabled = true
+            isTiltGesturesEnabled = true
+            isZoomControlsEnabled = false
+        }
 
-        myMap.moveCamera(CameraUpdateFactory.zoomOut())
+        myMap?.moveCamera(CameraUpdateFactory.zoomOut())
 
-        myMap.setOnMapClickListener { latLng ->
+        myMap?.setOnMapClickListener { latLng ->
             gameViewModel.setUserGuess(latLng)
+        }
+
+        gameViewModel.userGuess.value?.let { guess ->
+            updateGuessMarker(guess)
         }
     }
 }
+
