@@ -13,7 +13,7 @@
 
         override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             val score = intent?.getIntExtra("score", 0) ?: 0
-            val distance = intent?.getFloatExtra("distance", 0f) ?: 0f
+            val distance = intent?.getDoubleExtra("distance", 0.0)?.toFloat() ?: 0f
 
             Log.d("ScoreSavingService", "Received score: $score, distance: $distance")
 
