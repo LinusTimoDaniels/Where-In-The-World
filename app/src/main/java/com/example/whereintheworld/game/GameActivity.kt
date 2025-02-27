@@ -2,6 +2,7 @@ package com.example.whereintheworld.game
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
@@ -13,6 +14,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.whereintheworld.R
+import com.example.whereintheworld.data.ScoreSavingService
 import com.example.whereintheworld.databinding.ActivityGameBinding
 import com.example.whereintheworld.home.MainActivity
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -43,11 +45,9 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val gameEndMessageTextView: TextView = findViewById(R.id.gameEndMessage)
-
         setupEdgeToEdge()
         startGame()
-        observeViewModel(gameEndMessageTextView)
+        observeViewModel()
     }
 
     private fun setupEdgeToEdge() {
@@ -60,18 +60,13 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun observeViewModel(gameEndMessageTextView: TextView) {
+    private fun observeViewModel() {
         gameViewModel.location.observe(this) { newLocation ->
             setupStreetView(newLocation)
         }
 
         gameViewModel.userGuess.observe(this) { guess ->
             updateGuessMarker(guess)
-        }
-
-        gameViewModel.distance.observe(this) { distance ->
-            val distanceKm = distance / 1000 // Convert to kilometers
-            gameEndMessageTextView.text = "Game Over!\nYour Score: $distanceKm km"
         }
 
         gameViewModel.isMapExpanded.observe(this) { isExpanded ->
@@ -129,9 +124,17 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun endGame() {
+        Log.d("GameActivity", "endGame() called, starting ScoreSavingService")
+
+        val serviceIntent = Intent(this, ScoreSavingService::class.java).apply {
+            putExtra("distance", gameViewModel.distance.value)
+            putExtra("score", gameViewModel.score.value)
+        }
+        startService(serviceIntent)
+
+        // Update UI
         updateUIForEndGame()
         myMap?.setOnMapClickListener(null)
-
         addGameMarkersAndPolyline()
     }
 
@@ -139,6 +142,9 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         findViewById<View>(R.id.streetView).visibility = View.GONE
         findViewById<View>(R.id.gameEndLayout).visibility = View.VISIBLE
         findViewById<View>(R.id.endGameButton).visibility = View.GONE
+        val gameEndMessageTextView: TextView = findViewById(R.id.gameEndMessage)
+
+        gameEndMessageTextView.text = "Distance: ${gameViewModel.distance.value} km \nYour Score: ${gameViewModel.score.value}"
 
         val backToHomeButton = findViewById<Button>(R.id.backToHomeButton)
         backToHomeButton.visibility = View.VISIBLE

@@ -5,4 +5,7 @@
     <string name="start_game">Start Game</string>
     <string name="toggle_map_size">Toggle map size</string>
     <string name="end_game">End game</string>
+    <string name="back_to_home">Back to Home</string>
+    <string name="history">History</string>
+    <string name="no_data_availible">No data availible</string>
 </resources>

@@ -20,9 +20,8 @@
         tools:targetApi="31">
 
         <service
-            android:name=".game.GameService"
-            android:enabled="true"
-            android:exported="true"></service>
+            android:name=".data.ScoreSavingService"
+            android:exported="false"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
