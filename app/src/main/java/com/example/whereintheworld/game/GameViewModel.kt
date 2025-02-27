@@ -40,7 +40,7 @@ class GameViewModel : ViewModel() {
         val guess = _userGuess.value
         val actual = _location.value
         if (guess != null && actual != null) {
-            _distance.value = SphericalUtil.computeDistanceBetween(guess, actual) / 1000
+            _distance.value = String.format("%.3f", SphericalUtil.computeDistanceBetween(guess, actual) / 1000).toDouble()
             calculateScore()
         }
     }
