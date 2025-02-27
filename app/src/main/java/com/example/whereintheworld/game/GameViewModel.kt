@@ -31,6 +31,10 @@ class GameViewModel : ViewModel() {
         _location.value = LatLng(latitude, longitude)
     }
 
+    fun setLocation(latLng: LatLng) {
+        _location.value = latLng
+    }
+
     fun setUserGuess(latLng: LatLng) {
         _userGuess.value = latLng
         calculateDistance()

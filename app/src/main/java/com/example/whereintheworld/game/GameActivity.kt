@@ -44,6 +44,7 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        handleDeepLink()
         setupEdgeToEdge()
         startGame()
         observeViewModel()
@@ -58,6 +59,25 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
             insets
         }
     }
+
+    private fun handleDeepLink() {
+        val intent = intent
+        val action = intent.action
+        val data = intent.data
+
+        if (Intent.ACTION_VIEW == action && data != null) {
+            val lat = data.getQueryParameter("lat")?.toDoubleOrNull()
+            val lng = data.getQueryParameter("lng")?.toDoubleOrNull()
+
+            if (lat != null && lng != null) {
+                val location = LatLng(lat, lng)
+                gameViewModel.setLocation(location)
+            } else {
+                Toast.makeText(this, "Invalid coordinates in the link", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
     private fun observeViewModel() {
         gameViewModel.location.observe(this) { newLocation ->
@@ -76,7 +96,9 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun startGame() {
         setupMap()
-        gameViewModel.generateLocation()
+        if (gameViewModel.location.value == null) {
+            gameViewModel.generateLocation()
+        }
         setupUIButtons()
     }
 
@@ -227,7 +249,8 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun shareMapLocation() {
         val location = gameViewModel.location.value!!
-        val mapUri = "https://www.google.com/maps?q=${location.latitude},${location.longitude}"
+        val mapUri = "https://dynamiclinksfa.azurewebsites.net/startgame?lat=${location.latitude}&lng=${location.longitude}"
+
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"

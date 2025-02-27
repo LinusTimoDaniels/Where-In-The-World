@@ -27,10 +27,21 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
 
-        <activity
-            android:name=".game.GameActivity"
-            android:exported="false"
-            android:label="@string/title_activity_game" />
+        <activity android:name=".game.GameActivity"
+            android:exported="true">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="dynamiclinksfa.azurewebsites.net"/>
+                <data android:pathPrefix="/startgame"/>
+            </intent-filter>
+        </activity>
+
+
+
         <activity
             android:name=".home.MainActivity"
             android:exported="true">
