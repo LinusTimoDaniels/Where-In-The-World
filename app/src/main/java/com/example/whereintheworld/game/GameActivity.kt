@@ -106,9 +106,11 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun setupUIButtons() {
         val toggleButton = findViewById<FloatingActionButton>(R.id.toggleMapSizeButton)
         val endGameButton = findViewById<FloatingActionButton>(R.id.endGameButton)
+        val shareButton = findViewById<Button>(R.id.shareMapButton)
 
         toggleButton.setOnClickListener { gameViewModel.toggleMapSize() }
         endGameButton.setOnClickListener { endGame() }
+        shareButton.setOnClickListener { shareMapLocation() }
 
         endGameButton.visibility = View.GONE
     }
@@ -131,7 +133,6 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun endGame() {
-
         val serviceIntent = Intent(this, ScoreSavingService::class.java).apply {
             putExtra("distance", gameViewModel.distance.value)
             putExtra("score", gameViewModel.score.value)
@@ -223,6 +224,21 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
         gameViewModel.userGuess.value?.let { guess -> updateGuessMarker(guess) }
     }
+
+    private fun shareMapLocation() {
+        val location = gameViewModel.location.value!!
+        val mapUri = "https://www.google.com/maps?q=${location.latitude},${location.longitude}"
+
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, "Check out this location on the map: $mapUri")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+
+        try {
+            startActivity(Intent.createChooser(shareIntent, "Share Map"))
+        } catch (e: Exception) {
+            Toast.makeText(this, "No app available to share", Toast.LENGTH_SHORT).show()
+        }
+    }
 }
-
-
