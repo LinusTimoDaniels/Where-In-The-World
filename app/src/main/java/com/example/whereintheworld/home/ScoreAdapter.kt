@@ -14,14 +14,12 @@ class ScoreAdapter(private val scoreList: List<ScoreEntry>) : RecyclerView.Adapt
 
     inner class ScoreViewHolder(private val binding: ItemScoreBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(scoreEntry: ScoreEntry) {
-            // Format timestamp
+
             val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
             val formattedDate = dateFormat.format(Date(scoreEntry.timestamp))
 
-            // Format distance to 3 decimal places
             val formattedDistance = String.format("%.3f", scoreEntry.distance)
 
-            // Set values
             binding.scoreTextView.text = "Score: ${scoreEntry.score}, Distance: ${formattedDistance} km"
             binding.timestampTextView.text = "Date: $formattedDate"
         }

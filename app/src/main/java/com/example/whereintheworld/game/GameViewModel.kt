@@ -46,17 +46,16 @@ class GameViewModel : ViewModel() {
     }
 
     fun calculateScore() {
-        val distance = _distance.value ?: return  // Get the computed distance
+        val distance = _distance.value ?: return
 
-        val maxScore = 5000  // Maximum score
-        val maxDistance = 500000  // Maximum distance (e.g., 500 km, or 500,000 meters)
+        val maxScore = 5000
+        val maxDistance = 500000
 
-        // If the distance is less than the max distance, calculate the score
         val score = if (distance < maxDistance) {
             val score = maxScore * (1 - (distance / maxDistance.toDouble()))
-            score.toInt()  // Convert to integer
+            score.toInt()
         } else {
-            0  // If the distance is larger than the max distance, score is 0
+            0
         }
 
         _socre.value = score
