@@ -1,8 +1,10 @@
 package com.example.whereintheworld.game
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -12,6 +14,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.whereintheworld.R
 import com.example.whereintheworld.databinding.ActivityGameBinding
+import com.example.whereintheworld.home.MainActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -30,7 +33,7 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: ActivityGameBinding
     private val gameViewModel: GameViewModel by viewModels()
-    private var myMap: GoogleMap? = null // Changed to nullable type
+    private var myMap: GoogleMap? = null
 
     private var userMarker: Marker? = null
 
@@ -40,6 +43,14 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val gameEndMessageTextView: TextView = findViewById(R.id.gameEndMessage)
+
+        setupEdgeToEdge()
+        startGame()
+        observeViewModel(gameEndMessageTextView)
+    }
+
+    private fun setupEdgeToEdge() {
         enableEdgeToEdge()
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.game) { v, insets ->
@@ -47,12 +58,9 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        startGame()
-        observeViewModel()
     }
 
-    private fun observeViewModel() {
+    private fun observeViewModel(gameEndMessageTextView: TextView) {
         gameViewModel.location.observe(this) { newLocation ->
             setupStreetView(newLocation)
         }
@@ -62,7 +70,8 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         gameViewModel.distance.observe(this) { distance ->
-            Toast.makeText(this, "Distance to Location: ${distance / 1000} km", Toast.LENGTH_LONG).show()
+            val distanceKm = distance / 1000 // Convert to kilometers
+            gameEndMessageTextView.text = "Game Over!\nYour Score: $distanceKm km"
         }
 
         gameViewModel.isMapExpanded.observe(this) { isExpanded ->
@@ -73,18 +82,13 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun startGame() {
         setupMap()
         gameViewModel.generateLocation()
+        setupUIButtons()
+    }
 
-        // Map size toggle
-        val toggleButton = findViewById<FloatingActionButton>(R.id.toggleMapSizeButton)
-        val endGameButton = findViewById<FloatingActionButton>(R.id.endGameButton)
-
-        toggleButton.setOnClickListener {
-            gameViewModel.toggleMapSize()
-        }
-
-        endGameButton.setOnClickListener {
-            endGame()
-        }
+    private fun setupMap() {
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
 
     private fun setupStreetView(location: LatLng) {
@@ -104,14 +108,15 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun setupMap() {
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+    private fun setupUIButtons() {
+        val toggleButton = findViewById<FloatingActionButton>(R.id.toggleMapSizeButton)
+        val endGameButton = findViewById<FloatingActionButton>(R.id.endGameButton)
+
+        toggleButton.setOnClickListener { gameViewModel.toggleMapSize() }
+        endGameButton.setOnClickListener { endGame() }
     }
 
     private fun updateGuessMarker(guess: LatLng) {
-
         if (myMap != null && (userMarker == null || userMarker?.position != guess)) {
             userMarker?.remove()
             userMarker = myMap?.addMarker(
@@ -124,17 +129,35 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun endGame() {
+        updateUIForEndGame()
+        myMap?.setOnMapClickListener(null)
 
+        addGameMarkersAndPolyline()
+    }
+
+    private fun updateUIForEndGame() {
         findViewById<View>(R.id.streetView).visibility = View.GONE
         findViewById<View>(R.id.gameEndLayout).visibility = View.VISIBLE
+        findViewById<View>(R.id.endGameButton).visibility = View.GONE
 
-        findViewById<Button>(R.id.restartGameButton).setOnClickListener {
+        val backToHomeButton = findViewById<Button>(R.id.backToHomeButton)
+        backToHomeButton.visibility = View.VISIBLE
 
+        backToHomeButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            finish()
         }
+    }
+
+    private fun addGameMarkersAndPolyline() {
+        val location = gameViewModel.location.value!!
+        val userGuess = gameViewModel.userGuess.value!!
 
         myMap?.addMarker(
             MarkerOptions()
-                .position(gameViewModel.location.value!!)
+                .position(location)
                 .title("Actual Location")
                 .snippet("Actual City")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
@@ -142,19 +165,18 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
         myMap?.addPolyline(
             PolylineOptions()
-                .add(gameViewModel.userGuess.value!!, gameViewModel.location.value!!)
+                .add(userGuess, location)
                 .width(10f)
                 .color(getColor(R.color.black))
                 .pattern(listOf(Dash(20f), Gap(10f)))
         )
 
-        myMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(gameViewModel.location.value!!, 7.5f))
+        myMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 7.5f))
     }
 
     private fun adjustMapSize(isExpanded: Boolean) {
         val mapContainer = findViewById<View>(R.id.mapContainer)
         val params = mapContainer.layoutParams as ConstraintLayout.LayoutParams
-
         val displayMetrics = resources.displayMetrics
         val marginStartEnd = dpToPx(16)
 
@@ -175,10 +197,8 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         return (dp * resources.displayMetrics.density).toInt()
     }
 
-
     override fun onMapReady(googleMap: GoogleMap) {
         myMap = googleMap
-
         myMap?.uiSettings?.apply {
             isZoomGesturesEnabled = true
             isScrollGesturesEnabled = true
@@ -188,14 +208,10 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         myMap?.moveCamera(CameraUpdateFactory.zoomOut())
+        myMap?.setOnMapClickListener { latLng -> gameViewModel.setUserGuess(latLng) }
 
-        myMap?.setOnMapClickListener { latLng ->
-            gameViewModel.setUserGuess(latLng)
-        }
-
-        gameViewModel.userGuess.value?.let { guess ->
-            updateGuessMarker(guess)
-        }
+        gameViewModel.userGuess.value?.let { guess -> updateGuessMarker(guess) }
     }
 }
+
 
