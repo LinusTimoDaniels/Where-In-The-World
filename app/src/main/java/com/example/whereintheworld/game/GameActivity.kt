@@ -67,6 +67,7 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
         gameViewModel.userGuess.observe(this) { guess ->
             updateGuessMarker(guess)
+            toggleEndGameButtonVisibility(guess)
         }
 
         gameViewModel.isMapExpanded.observe(this) { isExpanded ->
@@ -109,6 +110,13 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
 
         toggleButton.setOnClickListener { gameViewModel.toggleMapSize() }
         endGameButton.setOnClickListener { endGame() }
+
+        endGameButton.visibility = View.GONE
+    }
+
+    private fun toggleEndGameButtonVisibility(guess: LatLng?) {
+        val endGameButton = findViewById<FloatingActionButton>(R.id.endGameButton)
+        endGameButton.visibility = if (guess != null) View.VISIBLE else View.GONE
     }
 
     private fun updateGuessMarker(guess: LatLng) {
@@ -124,7 +132,6 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun endGame() {
-        Log.d("GameActivity", "endGame() called, starting ScoreSavingService")
 
         val serviceIntent = Intent(this, ScoreSavingService::class.java).apply {
             putExtra("distance", gameViewModel.distance.value)
@@ -132,7 +139,6 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         startService(serviceIntent)
 
-        // Update UI
         updateUIForEndGame()
         myMap?.setOnMapClickListener(null)
         addGameMarkersAndPolyline()
