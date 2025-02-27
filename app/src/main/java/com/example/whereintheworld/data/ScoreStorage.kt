@@ -2,7 +2,6 @@ package com.example.whereintheworld.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -15,23 +14,16 @@ class ScoreStorage(context: Context) {
     fun saveScore(score: Int, distance: Float) {
         val scoresList = getScores().toMutableList()
         val newEntry = ScoreEntry(score, distance, System.currentTimeMillis())
+
         scoresList.add(newEntry)
-
         val jsonString = gson.toJson(scoresList)
-        Log.d("ScoreStorage", "Saving scores: $jsonString")
-
         sharedPreferences.edit().putString("scores", jsonString).apply()
-
-        // Prüfen, ob der Wert gespeichert wurde:
-        val storedString = sharedPreferences.getString("scores", null)
-        Log.d("ScoreStorage", "Stored in SharedPreferences: $storedString")
     }
 
 
 
     fun getScores(): List<ScoreEntry> {
         val jsonString = sharedPreferences.getString("scores", null) ?: return emptyList()
-        Log.d("ScoreStorage", "Retrieving scores: $jsonString")  // Debug-Ausgabe hinzufügen
         val type = object : TypeToken<List<ScoreEntry>>() {}.type
         return gson.fromJson(jsonString, type) ?: emptyList()
     }
