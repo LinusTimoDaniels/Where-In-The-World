@@ -8,4 +8,8 @@
     <string name="back_to_home">Back to Home</string>
     <string name="history">History</string>
     <string name="no_data_availible">No data availible</string>
+    <string name="total_points">Total Points: %d</string>
+    <string name="share_map">Share Map</string>
+    <string name="game_overview">Game Overview</string>
+
 </resources>

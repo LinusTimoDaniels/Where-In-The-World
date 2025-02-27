@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.whereintheworld.R
 import com.example.whereintheworld.data.ScoreStorage
 import com.example.whereintheworld.databinding.ActivityMainBinding
 import com.example.whereintheworld.game.GameActivity
@@ -30,10 +31,15 @@ class MainActivity : AppCompatActivity() {
         if (scores.isEmpty()) {
             binding.scoresRecyclerView.visibility = android.view.View.GONE
             binding.noDataTextView.visibility = android.view.View.VISIBLE
+            binding.totalPointsTextView.text = getString(R.string.total_points, 0)
         } else {
             binding.scoresRecyclerView.visibility = android.view.View.VISIBLE
             binding.noDataTextView.visibility = android.view.View.GONE
+
+            val totalPoints = scores.sumOf { it.score } // Calculate total points
+            binding.totalPointsTextView.text = getString(R.string.total_points, totalPoints)
         }
+
 
         scoreAdapter = ScoreAdapter(scores)
         binding.scoresRecyclerView.adapter = scoreAdapter
