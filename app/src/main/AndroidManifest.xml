@@ -7,6 +7,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+
 
 
     <application
@@ -23,6 +26,17 @@
         <service
             android:name=".data.ScoreSavingService"
             android:exported="false" />
+
+        <service android:name=".notification.NotificationService"
+            android:enabled="true"
+            android:exported="false"/>
+
+        <receiver android:name=".notification.NotificationService$NotificationReceiver"
+            android:enabled="true"
+            android:exported="false"/>
+
+
+
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
