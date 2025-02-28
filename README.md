@@ -30,5 +30,6 @@ The Code ChatGpt generated was reviewed for understanding and adjusted for speci
 ## Implementation
 ![Implemented Class Diagram](app/assets/Screenshot%202025-02-28%20113344.png)
 
-The classes i implemented aren't exactly the same as i planned them in my class diagramm.
-altought its simmilar i have added multiple classes for the
+The classes i implemented aren't exactly the same as i planned them in my class diagram.
+I need additional classes for the handling of displaying data in a recycler list, for the implementation of sending notifications to the user and storing data as shared preferences.
+This is because i when planing the project i knew what i wanted to have but i didn't yet know how to implement these features which is why the change is class structure happend.
