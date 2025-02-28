@@ -78,7 +78,6 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-
     private fun observeViewModel() {
         gameViewModel.location.observe(this) { newLocation ->
             setupStreetView(newLocation)

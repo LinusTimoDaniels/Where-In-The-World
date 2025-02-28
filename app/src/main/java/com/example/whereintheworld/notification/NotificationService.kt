@@ -22,7 +22,7 @@ class NotificationService : Service() {
     private val notificationRunnable = object : Runnable {
         override fun run() {
             sendNotification()
-            handler.postDelayed(this, 10 * 1000) // Repeat every 10 seconds
+            handler.postDelayed(this, 10 * 1000)
         }
     }
 
@@ -36,7 +36,6 @@ class NotificationService : Service() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val vibrationPattern = longArrayOf(0, 100, 1000)
 
-        // Create an Intent to launch the app (MainActivity)
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -55,8 +54,8 @@ class NotificationService : Service() {
             .setVibrate(vibrationPattern)
             .setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)  // Automatically dismiss notification when clicked
-            .setContentIntent(pendingIntent)  // Set the PendingIntent here to open the app
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
             .build()
 
         notificationManager.notify(notificationId, notification)

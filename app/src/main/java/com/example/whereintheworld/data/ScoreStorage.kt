@@ -20,8 +20,6 @@ class ScoreStorage(context: Context) {
         sharedPreferences.edit().putString("scores", jsonString).apply()
     }
 
-
-
     fun getScores(): List<ScoreEntry> {
         val jsonString = sharedPreferences.getString("scores", null) ?: return emptyList()
         val type = object : TypeToken<List<ScoreEntry>>() {}.type
