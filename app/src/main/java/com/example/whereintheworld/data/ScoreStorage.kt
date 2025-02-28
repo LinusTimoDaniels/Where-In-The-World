@@ -26,7 +26,6 @@ class ScoreStorage(context: Context) {
         return gson.fromJson(jsonString, type) ?: emptyList()
     }
 
-
     fun clearScores() {
         sharedPreferences.edit().remove("scores").apply()
     }

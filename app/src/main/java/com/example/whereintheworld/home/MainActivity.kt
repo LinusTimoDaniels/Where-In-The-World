@@ -56,7 +56,8 @@ class MainActivity : AppCompatActivity() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
                 requestNotificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
             } else {
                 NotificationScheduler.scheduleDailyNotification(this)

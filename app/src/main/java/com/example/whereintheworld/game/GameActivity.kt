@@ -21,13 +21,13 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.SupportStreetViewPanoramaFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.Dash
 import com.google.android.gms.maps.model.Gap
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class GameActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -249,7 +249,6 @@ class GameActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun shareMapLocation() {
         val location = gameViewModel.location.value!!
         val mapUri = "https://dynamiclinksfa.azurewebsites.net/startgame?lat=${location.latitude}&lng=${location.longitude}"
-
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"

@@ -5,4 +5,3 @@ data class ScoreEntry(
     val distance: Float,
     val timestamp: Long
 )
-
