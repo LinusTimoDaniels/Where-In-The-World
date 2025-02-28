@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
+import kotlin.random.Random
 
 class GameViewModel : ViewModel() {
 
@@ -23,11 +24,23 @@ class GameViewModel : ViewModel() {
     private val _socre = MutableLiveData<Int>()
     val score: LiveData<Int> get() = _socre
 
+    private val locationList = listOf(
+        LatLng(48.859318, 2.292737),    // Location 1 (Eiffel Tower, Paris)
+        LatLng(40.748817, -73.985428),  // Location 2 (Empire State Building, New York)
+        LatLng(51.5074, -0.1278),       // Location 3 (London)
+        LatLng(34.0522, -118.2437),     // Location 4 (Los Angeles)
+        LatLng(35.6895, 139.6917),      // Location 5 (Tokyo)
+        LatLng(40.712776, -74.005974),  // Location 6 (New York City)
+        LatLng(48.2082, 16.3738),       // Location 7 (Vienna)
+        LatLng(37.7749, -122.4194),     // Location 8 (San Francisco)
+        LatLng(52.5200, 13.4050),       // Location 9 (Berlin)
+        LatLng(39.9042, 116.4074)       // Location 10 (Beijing)
+    )
+
 
     fun generateLocation() {
-        val latitude = 48.859318
-        val longitude = 2.292737
-        _location.value = LatLng(latitude, longitude)
+        val randomLocation = locationList[Random.nextInt(locationList.size)]
+        _location.value = randomLocation
     }
 
     fun setLocation(latLng: LatLng) {
@@ -49,19 +62,13 @@ class GameViewModel : ViewModel() {
     }
 
     fun calculateScore() {
-        val distance = _distance.value ?: return
+        val distance = _distance.value?.toInt() ?: return
 
-        val maxScore = 5000
-        val maxDistance = 500000
-
-        val score = if (distance < maxDistance) {
-            val score = maxScore * (1 - (distance / maxDistance.toDouble()))
-            score.toInt()
-        } else {
-            0
+        _socre.value = when {
+            distance == 0 -> 5000
+            distance >= 50000 -> 0
+            else -> 5000 - (distance * 5000 / 50000)
         }
-
-        _socre.value = score
     }
 
 
