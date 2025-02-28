@@ -25,10 +25,10 @@ The Code ChatGpt generated was reviewed for understanding and adjusted for speci
 
 ## Plan
 
-![Class Diagram](../assets/ClassDiagramm.png)
+![Class Diagram](app/assets/ClassDiagramm.png)
 
 ## Implementation
-![Implemented Class Diagram](../assets/Screenshot%202025-02-28%20113344.png)
+![Implemented Class Diagram](app/assets/Screenshot%202025-02-28%20113344.png)
 
 The classes i implemented aren't exactly the same as i planned them in my class diagramm.
 altought its simmilar i have added multiple classes for the
