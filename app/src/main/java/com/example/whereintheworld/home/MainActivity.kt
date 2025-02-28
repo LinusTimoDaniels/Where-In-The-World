@@ -3,7 +3,6 @@ package com.example.whereintheworld.home
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,17 +10,19 @@ import com.example.whereintheworld.R
 import com.example.whereintheworld.data.ScoreStorage
 import com.example.whereintheworld.databinding.ActivityMainBinding
 import com.example.whereintheworld.game.GameActivity
-import com.example.whereintheworld.notification.NotificationService
+import com.example.whereintheworld.notification.NotificationScheduler
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var scoreAdapter: ScoreAdapter
 
-    // Register the permission request result callback
+    // Permission request for Android 13+
     private val requestNotificationPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // No Toasts for permission status
+            if (isGranted) {
+                NotificationScheduler.scheduleDailyNotification(this)
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,8 +30,6 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        enableEdgeToEdge()
 
         binding.scoresRecyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -44,8 +43,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.scoresRecyclerView.visibility = android.view.View.VISIBLE
             binding.noDataTextView.visibility = android.view.View.GONE
-
-            val totalPoints = scores.sumOf { it.score } // Calculate total points
+            val totalPoints = scores.sumOf { it.score }
             binding.totalPointsTextView.text = getString(R.string.total_points, totalPoints)
         }
 
@@ -57,17 +55,16 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Request notification permission if targeting Android 13 or higher
+        // ✅ Request notification permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Check if the user has granted notification permission
-            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                // Request notification permission
+            if (checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                 requestNotificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                NotificationScheduler.scheduleDailyNotification(this)
             }
+        } else {
+            NotificationScheduler.scheduleDailyNotification(this)
         }
-
-        // Start the notification service
-        val serviceIntent = Intent(this, NotificationService::class.java)
-        startService(serviceIntent)
     }
 }

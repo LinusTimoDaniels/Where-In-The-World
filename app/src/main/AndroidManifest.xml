@@ -25,14 +25,16 @@
             android:name=".data.ScoreSavingService"
             android:exported="false" />
 
-        <service android:name=".notification.NotificationService"
-            android:enabled="true"
+        <receiver android:name=".notification.NotificationReceiver"
             android:exported="false"/>
 
-        <receiver android:name=".notification.NotificationService$NotificationReceiver"
+        <receiver android:name=".notification.BootReceiver"
             android:enabled="true"
-            android:exported="false"/>
-
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
 
 
 
