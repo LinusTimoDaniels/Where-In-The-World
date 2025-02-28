@@ -1,0 +1,87 @@
+@startuml
+
+class MainActivity {
+    - ActivityMainBinding binding
+    + onCreate(Bundle?): void
+    + scheduleNotification(): void
+}
+
+class GameActivity {
+    - ActivityGameBinding binding
+    - GoogleMap myMap
+    - StreetViewPanorama streetViewPanorama
+    - LatLng guess
+    - LatLng location
+    - double distance
+    - Marker? userMarker
+    - boolean isMapExpanded
+    + onCreate(Bundle?): void
+    + onStop(): void
+    + startGame(): void
+    + endGame(): void
+    + toggleMapSize(View): void
+    + onMapReady(GoogleMap): void
+}
+
+class GameViewModel {
+    - MutableLiveData<LatLng> _location
+    - MutableLiveData<LatLng> _userGuess
+    - MutableLiveData<Double> _distance
+    - MutableLiveData<Boolean> _isMapExpanded
+    + generateLocation(): void
+    + setUserGuess(LatLng): void
+    + calculateDistance(): void
+    + toggleMapSize(): void
+}
+
+class ScoreSavingService {
+    + onStartCommand(Intent, int, int): int
+    + saveScore(int): void
+}
+
+class ScoreStorage {
+    + saveScore(int, float): void
+    + getScores(): List<ScoreEntry>
+}
+
+class ScoreEntry {
+    + score: int
+    + distance: float
+}
+
+class ScoreAdapter {
+    + onCreateViewHolder(ViewGroup, int): ViewHolder
+    + onBindViewHolder(ViewHolder, int): void
+    + getItemCount(): int
+}
+
+class NotificationService {
+    + showNotification(Context, String, String): void
+}
+
+class NotificationScheduler {
+    + scheduleDailyNotification(Context): void
+}
+
+class BootReceiver {
+    + onReceive(Context, Intent): void
+}
+
+class NotificationReceiver {
+    + onReceive(Context, Intent): void
+}
+
+MainActivity --> GameActivity : starts
+GameActivity --> GameViewModel : observes
+GameActivity --> GoogleMap : displays
+GameViewModel --> LatLng : manages
+MainActivity --> NotificationScheduler : schedules notifications
+GameActivity --> ScoreStorage : stores scores
+GameActivity --> ScoreSavingService : saves scores
+NotificationScheduler --> NotificationService : triggers
+MainActivity --> ScoreAdapter : displays scores
+ScoreStorage --> ScoreEntry : contains
+BootReceiver --> NotificationScheduler : triggers on boot
+NotificationReceiver --> NotificationService : handles notifications
+
+@enduml
